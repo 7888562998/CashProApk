@@ -1,6 +1,6 @@
 import axios from "axios";
-import { getCookie } from "../commonFunctions/common";
-import { baseUrl } from "../env/env";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { baseUrl } from "../env";
 
 // Create an Axios instance
 const axiosInstance = axios.create({
@@ -10,8 +10,8 @@ const axiosInstance = axios.create({
 
 // Add an interceptor to dynamically update headers for each request
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getCookie("user-token"); // Get token before each request
+  async(config) => {
+    const token = await AsyncStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`; // Set token to Authorization header
     }

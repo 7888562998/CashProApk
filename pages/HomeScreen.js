@@ -1,17 +1,42 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { StyleSheet, Text, View } from "react-native";
 import GridLayout from "../components/GridLayout";
- 
+import axiosInstance from "../services/service";
+
 const HomeScreen = ({ navigation }) => {
   const handleApplyLoan = () => {
     // Logic for applying for a loan
     console.log("Apply Loan button pressed");
   };
- 
+
   const handleLogout = () => {
-    navigation.navigate("Login");
+    navigation.navigate("Login",{ reload: true });
   };
+
+  const [data, setData] = useState();
+  const [amounts, setAmounts] = useState("");
+  const getLoanList = async () => {
+    try {
+      const result = await axiosInstance.get("/loan/list");
+      if (result.status === 200) {
+        console.log(result.data[0].detail, "result");
+        setData(result.data[0].detail);
+        setAmounts({
+          loanAmount: result.data[0].loanAmount,
+          tottleAmount: result.data[0].tottleAmount,
+        });
+      }
+    } catch (error) {
+      navigation.navigate("Login");
+      await AsyncStorage.setItem('token', "");
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    getLoanList();
+  }, []);
+
   return (
     <View>
       <View style={styles.buttonsContainer}>
@@ -21,31 +46,33 @@ const HomeScreen = ({ navigation }) => {
         >
           <Text style={styles.buttonText}>Apply Loan</Text>
         </TouchableOpacity>
- 
+
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.buttonText}>Logout</Text>
         </TouchableOpacity>
       </View>
-        <View style={styles.loanInfo}>
-            <Text style={styles.buttonText}>Loan Amount:Rs90000</Text>
-            <Text style={styles.buttonText}>
-              Tottle Amount with interest:Rs:100800
-            </Text>
-        </View>
-        <View style={{marginTop:20}}>
-           <GridLayout/>
-        </View>
+      <View style={styles.loanInfo}>
+        <Text style={styles.buttonText}>
+          Loan Amount:Rs{amounts.loanAmount}
+        </Text>
+        <Text style={styles.buttonText}>
+          Tottle Amount with interest:Rs:{amounts.tottleAmount}
+        </Text>
+      </View>
+      <View style={{ marginTop: 20 }}>
+        <GridLayout data={data} />
+      </View>
     </View>
   );
 };
- 
+
 const styles = StyleSheet.create({
   buttonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop:40,
-    marginBottom:20,
+    marginTop: 40,
+    marginBottom: 20,
     marginHorizontal: 10,
   },
   marqueContainer: {
@@ -79,7 +106,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   loanInfo: {
-    marginHorizontal:"auto",
+    marginHorizontal: "auto",
     backgroundColor: "green",
     width: "80%",
     justifyContent: "center",
@@ -88,5 +115,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
 });
- 
+
 export default HomeScreen;

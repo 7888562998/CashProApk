@@ -9,10 +9,31 @@ import {
   StatusBar,
   SafeAreaView,
 } from "react-native";
+import axiosInstance from "../services/service";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [psw, setPsw] = useState('');
+  
+  const handleSubmit=async()=>{
+    const data = {
+      email,
+      password: psw,
+    };
+    try {
+      const result = await axiosInstance.post("/login", data);
+      if (result.status === 200) {
+        console.log(result.data.token,"result");
+        await AsyncStorage.setItem('token', result.data.token);
+        navigation.navigate("Home",{ reload: true });
+      }
+    } catch (error) {
+      // toast.error("Invalid password or email");
+      console.log(error);
+    }
+  }
+
   return (
     <ImageBackground
       source={{
@@ -39,7 +60,7 @@ export default function LoginScreen({ navigation }) {
           />
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate("Home")}
+            onPress={handleSubmit}
           >
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
