@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { StyleSheet, Text, View } from "react-native";
 import GridLayout from "../components/GridLayout";
 import axiosInstance from "../services/service";
+import { useFocusEffect } from "@react-navigation/native";
 
 const HomeScreen = ({ navigation }) => {
   const handleApplyLoan = () => {
@@ -10,8 +11,9 @@ const HomeScreen = ({ navigation }) => {
     console.log("Apply Loan button pressed");
   };
 
-  const handleLogout = () => {
-    navigation.navigate("Login",{ reload: true });
+  const handleLogout = async () => {
+    navigation.navigate("Login", { reload: true });
+    await AsyncStorage.setItem("token", "");
   };
 
   const [data, setData] = useState();
@@ -29,13 +31,16 @@ const HomeScreen = ({ navigation }) => {
       }
     } catch (error) {
       navigation.navigate("Login");
-      await AsyncStorage.setItem('token', "");
+      await AsyncStorage.setItem("token", "");
       console.log(error);
     }
   };
-  useEffect(() => {
-    getLoanList();
-  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getLoanList();
+    }, [])
+  );
 
   return (
     <View>
