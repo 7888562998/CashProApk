@@ -8,6 +8,7 @@ import { useFocusEffect } from "@react-navigation/native";
 const HomeScreen = ({ navigation }) => {
   const handleApplyLoan = () => {
     // Logic for applying for a loan
+    navigation.navigate("ApplyLoan", { reload: true });
     console.log("Apply Loan button pressed");
   };
 
